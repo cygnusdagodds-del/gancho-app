@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Ganchos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .logo {
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    .upload-area {
+      width: 100%;
+      max-width: 480px;
+      border: 1.5px dashed #333;
+      border-radius: 16px;
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: #161616;
+    }
+
+    .upload-area:hover, .upload-area.drag {
+      border-color: #8b5cf6;
+      background: #1a1525;
+    }
+
+    .upload-icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+
+    .upload-area p {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .upload-area strong {
+      color: #ccc;
+      font-weight: 500;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: #8b5cf6;
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-primary:disabled { background: #444; cursor: not-allowed; }
+
+    #file-input { display: none; }
+
+    .progress-card {
+      width: 100%;
+      max-width: 480px;
+      background: #161616;
+      border: 1px solid #222;
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid #333;
+      border-top-color: #8b5cf6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-text {
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 4px;
+      background: #222;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #8b5cf6;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .results {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 32px;
+      display: none;
+    }
+
+    .results h2 {
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .gancho-group {
+      margin-bottom: 28px;
+    }
+
+    .gancho-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .gancho-num {
+      width: 28px; height: 28px;
+      background: #8b5cf6;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .gancho-info { flex: 1; }
+
+    .gancho-trecho {
+      font-size: 13px;
+      color: #ddd;
+      font-style: italic;
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .gancho-motivo {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    .download-btns {
+      display: flex;
+      gap: 10px;
+      margin-left: 40px;
+    }
+
+    .btn-download {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      text-align: center;
+      border: 1px solid #333;
+      color: #ccc;
+      background: #1c1c1c;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .btn-download:hover {
+      border-color: #8b5cf6;
+      color: #8b5cf6;
+      background: #1a1525;
+    }
+
+    .btn-download .formato {
+      display: block;
+      font-size: 10px;
+      color: #555;
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #1e1e1e;
+      margin: 20px 0;
+    }
+
+    .error-card {
+      width: 100%;
+      max-width: 480px;
+      background: #1a0a0a;
+      border: 1px solid #3d1515;
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-size: 13px;
+      color: #f87171;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .reiniciar {
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #333;
+      color: #888;
+      font-size: 13px;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-ghost:hover { border-color: #555; color: #ccc; }
+  </style>
+</head>
+<body>
+
+  <div class="logo">Gancho IA</div>
+
+  <h1>Ganchos em 1 clique</h1>
+  <p class="subtitle">Sube o vídeo, a IA escolhe os 3 melhores ganchos<br>e entrega 6 vídeos prontos (Stories + Feed)</p>
+
+  <div class="upload-area" id="upload-area">
+    <div class="upload-icon">🎬</div>
+    <p><strong>Arraste o vídeo aqui</strong><br>ou clique para selecionar</p>
+    <p style="font-size:12px; color:#444; margin-top:8px;">MP4, MOV ou WEBM · até 500MB</p>
+    <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">Selecionar vídeo</button>
+    <input type="file" id="file-input" accept="video/*">
+  </div>
+
+  <div class="progress-card" id="progress-card">
+    <div class="status-line">
+      <div class="spinner"></div>
+      <span class="status-text" id="status-text">Enviando vídeo...</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <div class="error-card" id="error-card"></div>
+
+  <div class="results" id="results">
+    <h2>Seus 6 vídeos estão prontos 🎉</h2>
+    <div id="videos-list"></div>
+    <div class="reiniciar">
+      <button class="btn-ghost" onclick="reiniciar()">Processar outro vídeo</button>
+    </div>
+  </div>
+
+  <script>
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const progressCard = document.getElementById('progress-card');
+    const statusText = document.getElementById('status-text');
+    const progressBar = document.getElementById('progress-bar');
+    const errorCard = document.getElementById('error-card');
+    const results = document.getElementById('results');
+    const videosList = document.getElementById('videos-list');
+
+    const statusLabels = {
+      processando:  { text: 'Enviando vídeo...', pct: 10 },
+      transcrevendo:{ text: 'Transcrevendo o áudio com IA...', pct: 35 },
+      analisando:   { text: 'Claude analisando os melhores ganchos...', pct: 60 },
+      montando:     { text: 'Montando os 6 vídeos...', pct: 85 },
+      pronto:       { text: 'Pronto!', pct: 100 },
+      erro:         { text: 'Ocorreu um erro.', pct: 0 },
+    };
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag');
+      if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) processFile(fileInput.files[0]);
+    });
+
+    async function processFile(file) {
+      uploadArea.style.display = 'none';
+      progressCard.style.display = 'block';
+      errorCard.style.display = 'none';
+      results.style.display = 'none';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      let jobId;
+      try {
+        const res = await fetch('/upload', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Erro no upload');
+        const data = await res.json();
+        jobId = data.job_id;
+      } catch (e) {
+        showError('Erro ao enviar o vídeo. Tente novamente.');
+        return;
+      }
+
+      // Polling
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/status/${jobId}`);
+          const data = await res.json();
+          const s = statusLabels[data.status] || { text: data.status, pct: 50 };
+          statusText.textContent = s.text;
+          progressBar.style.width = s.pct + '%';
+
+          if (data.status === 'pronto') {
+            clearInterval(interval);
+            progressCard.style.display = 'none';
+            showResults(data.videos);
+          } else if (data.status === 'erro') {
+            clearInterval(interval);
+            showError(data.erro || 'Erro desconhecido.');
+          }
+        } catch (e) {}
+      }, 2000);
+    }
+
+    function showResults(videos) {
+      results.style.display = 'block';
+      videosList.innerHTML = '';
+
+      // Agrupa por gancho
+      const grupos = {};
+      videos.forEach(v => {
+        if (!grupos[v.gancho_numero]) grupos[v.gancho_numero] = { info: v, formatos: [] };
+        grupos[v.gancho_numero].formatos.push(v);
+      });
+
+      Object.values(grupos).forEach((grupo, i) => {
+        const div = document.createElement('div');
+        div.className = 'gancho-group';
+
+        const btnStories = grupo.formatos.find(f => f.formato === 'stories');
+        const btnFeed = grupo.formatos.find(f => f.formato === 'feed');
+
+        div.innerHTML = `
+          ${i > 0 ? '<hr class="divider">' : ''}
+          <div class="gancho-header">
+            <div class="gancho-num">${grupo.info.gancho_numero}</div>
+            <div class="gancho-info">
+              <div class="gancho-trecho">"${grupo.info.trecho}"</div>
+              <div class="gancho-motivo">${grupo.info.motivo}</div>
+            </div>
+          </div>
+          <div class="download-btns">
+            ${btnStories ? `<a href="${btnStories.url}" download class="btn-download">⬇ Baixar<span class="formato">Stories 9:16</span></a>` : ''}
+            ${btnFeed ? `<a href="${btnFeed.url}" download class="btn-download">⬇ Baixar<span class="formato">Feed 3:4</span></a>` : ''}
+          </div>
+        `;
+        videosList.appendChild(div);
+      });
+    }
+
+    function showError(msg) {
+      progressCard.style.display = 'none';
+      errorCard.style.display = 'block';
+      errorCard.textContent = '⚠ ' + msg;
+      uploadArea.style.display = 'block';
+    }
+
+    function reiniciar() {
+      results.style.display = 'none';
+      errorCard.style.display = 'none';
+      uploadArea.style.display = 'block';
+      fileInput.value = '';
+    }
+  </script>
+</body>
+</html>
