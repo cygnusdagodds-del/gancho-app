@@ -1,0 +1,1 @@
+import{w as t,u as r,r as o}from"./chunk-LFPYN7LY-WBqmoi8u.js";const c=t(function(){const e=r();return o.useEffect(()=>{localStorage.getItem("rh_operator")?e("/standalone",{replace:!0}):e("/standalone/entrar",{replace:!0})},[e]),null});export{c as default};
